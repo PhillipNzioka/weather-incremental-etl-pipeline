@@ -1,46 +1,62 @@
+"""Extract: Open-Meteo geocoding + archive API, with timeout and retries."""
+
+import logging
 import time
 from datetime import date
+
 import requests
-from config import (BACKOFF_DELAYS, GEOCODE_URL, ARCHIVE_URL, DAILY_VARIABLES, START_DATE)
+
+import config
+
+logger = logging.getLogger(__name__)
 
 
-def get_json(url: str, params: dict = None, timeout: float = 5.0) -> dict:
+def get_json(url: str, params: dict | None = None, timeout: float | None = None) -> dict:
+    """Fetch JSON with a timeout and exponential backoff.
+
+    Tries config.MAX_RETRIES times (waits 1s, 2s, 4s...). Re-raises the last
+    RequestException once every attempt has failed, so the caller can decide
+    whether to skip the town or abort.
     """
-    Fetches JSON data from a URL with a timeout and exponential backoff retries.
-    Retries after 1s, 2s, and 4s on request failures or server errors.
-    """
-    # backoff_delays = [1, 2, 4]
-    
-    for attempt, delay in enumerate(BACKOFF_DELAYS):
+    delays = config.BACKOFF_SECONDS
+    timeout = config.REQUEST_TIMEOUT if timeout is None else timeout
+    attempts = max(config.MAX_RETRIES, 1)
+    last_error: Exception | None = None
+
+    for attempt in range(attempts):
         try:
             response = requests.get(url, params=params, timeout=timeout)
-            
-            # Raise an HTTPError for 4xx or 5xx status codes
             response.raise_for_status()
-            
             return response.json()
-            
-        except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
-            print(f"Attempt {attempt + 1} failed: {e}. Retrying in {delay}s...")
-            time.sleep(delay)
-            
-    # Final attempt after backoff loops are exhausted
-    final_response = requests.get(url, params=params, timeout=timeout)
-    final_response.raise_for_status()
-    return final_response.json()
+        except requests.RequestException as exc:
+            last_error = exc
+            if attempt < attempts - 1:
+                delay = delays[min(attempt, len(delays) - 1)]
+                logger.warning(
+                    "attempt %d/%d failed: %s. Retrying in %ss",
+                    attempt + 1, attempts, exc, delay,
+                )
+                time.sleep(delay)
+            else:
+                logger.error("attempt %d/%d failed: %s", attempt + 1, attempts, exc)
 
-def get_geocode(town):
-# Example usage with your URL:
-    url = GEOCODE_URL
+    raise last_error
+
+
+def get_geocode(town: str) -> dict | None:
+    """Look a town up; return a dim_city-ready dict, or None if there is no hit."""
     params = {
         "name": town,
-        "countryCode": "KE",
-        "count": 1
+        "countryCode": config.COUNTRY_CODE,
+        "count": 1,
     }
 
-    data = get_json(url, params)
-    payload = data.get("results")
-    hit = payload[0]
+    data = get_json(config.GEOCODING_URL, params)
+    results = data.get("results")
+    if not results:
+        return None
+
+    hit = results[0]
     return {
         "city_id": hit["id"],
         "name": hit["name"],
@@ -49,23 +65,18 @@ def get_geocode(town):
         "longitude": hit["longitude"],
         "elevation": hit.get("elevation"),
         "population": hit.get("population"),
+        "timezone": hit.get("timezone"),
     }
-    
 
-def fetch_weather(city, start_date, end_date):
-    payload = get_json(ARCHIVE_URL, 
-        {
-            "latitude": city["latitude"],
-	        "longitude": city["longitude"],
-	        "start_date": start_date.isoformat(), 
-	        "end_date": end_date.isoformat(),
-            "daily": ",".join(DAILY_VARIABLES),
-            "timezone": "Africa/Nairobi"
-        })
-    return payload
 
-towns = ["Nairobi", "Kisumu", "Mombasa", "Nakuru"]
-for town in towns:
-    print(f"City: {town}")
-    print(fetch_weather(get_geocode(town), START_DATE, date(2025, 1, 3)))
-    print()
+def fetch_weather(latitude: float, longitude: float, start_date: date, end_date: date) -> dict:
+    """Fetch the daily archive for one point and inclusive date window."""
+    params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat(),
+        "daily": ",".join(config.DAILY_VARIABLES),
+        "timezone": config.TIMEZONE,
+    }
+    return get_json(config.ARCHIVE_URL, params)

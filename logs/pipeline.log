@@ -1,0 +1,42 @@
+2026-11-24 12:41:44 INFO     __main__: pipeline start (today=2026-11-24)
+2026-11-24 12:41:49 INFO     load: schema ready (create_tables.sql applied)
+2026-11-24 12:41:51 INFO     load: run 1 started
+2026-11-24 12:41:57 INFO     load: upserted 5 dim_city rows
+2026-11-24 12:41:57 INFO     __main__: Nairobi: fetching 2025-01-01..2026-11-19
+2026-11-24 12:41:59 INFO     load: upserted 688 dim_date rows
+2026-11-24 12:42:00 INFO     load: upserted 688 fact_daily_weather rows
+2026-11-24 12:42:00 INFO     load: watermark for city_id=184745 -> 2026-11-19
+2026-11-24 12:42:00 INFO     __main__: Nairobi: extracted=688 loaded=688 rejected=0
+2026-11-24 12:42:00 INFO     __main__: Mombasa: fetching 2025-01-01..2026-11-19
+2026-11-24 12:42:02 INFO     load: upserted 688 dim_date rows
+2026-11-24 12:42:03 INFO     load: upserted 688 fact_daily_weather rows
+2026-11-24 12:42:03 INFO     load: watermark for city_id=186301 -> 2026-11-19
+2026-11-24 12:42:03 INFO     __main__: Mombasa: extracted=688 loaded=688 rejected=0
+2026-11-24 12:42:03 INFO     __main__: Kisumu: fetching 2025-01-01..2026-11-19
+2026-11-24 12:42:05 INFO     load: upserted 688 dim_date rows
+2026-11-24 12:42:05 INFO     load: upserted 688 fact_daily_weather rows
+2026-11-24 12:42:06 INFO     load: watermark for city_id=191245 -> 2026-11-19
+2026-11-24 12:42:06 INFO     __main__: Kisumu: extracted=688 loaded=688 rejected=0
+2026-11-24 12:42:06 INFO     __main__: Nakuru: fetching 2025-01-01..2026-11-19
+2026-11-24 12:42:08 INFO     load: upserted 688 dim_date rows
+2026-11-24 12:42:09 INFO     load: upserted 688 fact_daily_weather rows
+2026-11-24 12:42:09 INFO     load: watermark for city_id=184622 -> 2026-11-19
+2026-11-24 12:42:09 INFO     __main__: Nakuru: extracted=688 loaded=688 rejected=0
+2026-11-24 12:42:09 INFO     __main__: Eldoret: fetching 2025-01-01..2026-11-19
+2026-11-24 12:42:11 INFO     load: upserted 688 dim_date rows
+2026-11-24 12:42:11 INFO     load: upserted 688 fact_daily_weather rows
+2026-11-24 12:42:12 INFO     load: watermark for city_id=198629 -> 2026-11-19
+2026-11-24 12:42:12 INFO     __main__: Eldoret: extracted=688 loaded=688 rejected=0
+2026-11-24 12:42:14 INFO     load: run 1 finished: status=success extracted=3440 loaded=3440 rejected=0
+2026-11-24 12:42:14 INFO     __main__: pipeline finished: extracted=3440 loaded=3440 rejected=0
+2026-11-24 13:00:36 INFO     __main__: pipeline start (today=2026-11-24)
+2026-11-24 13:00:41 INFO     load: schema ready (create_tables.sql applied)
+2026-11-24 13:00:42 INFO     load: run 2 started
+2026-11-24 13:00:48 INFO     load: upserted 5 dim_city rows
+2026-11-24 13:00:49 INFO     __main__: Nairobi: nothing new since 2026-11-19, skipped
+2026-11-24 13:00:49 INFO     __main__: Mombasa: nothing new since 2026-11-19, skipped
+2026-11-24 13:00:49 INFO     __main__: Kisumu: nothing new since 2026-11-19, skipped
+2026-11-24 13:00:50 INFO     __main__: Nakuru: nothing new since 2026-11-19, skipped
+2026-11-24 13:00:50 INFO     __main__: Eldoret: nothing new since 2026-11-19, skipped
+2026-11-24 13:00:51 INFO     load: run 2 finished: status=success extracted=0 loaded=0 rejected=0
+2026-11-24 13:00:51 INFO     __main__: pipeline finished: extracted=0 loaded=0 rejected=0
